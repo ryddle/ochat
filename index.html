@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OChat</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent: #6c5ce7;
+            --accent-hover: #8075e9;
+            --danger: #ff5252;
+            --menu-width: 250px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .menu-column {
+            width: var(--menu-width);
+            background-color: var(--bg-secondary);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border-right: 1px solid #3d3d3d;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .menu-header {
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        .menu-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .menu-section h3 {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .chat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow-y: auto;
+            max-height: 50vh;
+        }
+
+        .chat-item {
+            padding: 0.5rem;
+            border-radius: 5px;
+            background-color: var(--bg-primary);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-item.active {
+            background-color: var(--accent);
+        }
+
+        .chat-item:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .chat-item .delete-chat {
+            opacity: 0;
+            transition: opacity 0.2s;
+            background: none;
+            border: none;
+            color: var(--danger);
+            width: auto;
+            padding: 0.2rem;
+        }
+
+        .chat-item:hover .delete-chat {
+            opacity: 1;
+        }
+
+        .chat-column {
+            flex: 1;
+            margin-left: var(--menu-width);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            gap: 0.5rem;
+        }
+
+        .chat-title {
+            flex: 1;
+            background-color: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+
+        .chat-title:focus {
+            background-color: var(--bg-primary);
+            outline: none;
+        }
+
+        select, button {
+            background-color: var(--accent);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        select:hover, button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .save-button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            width: 5rem;
+        }
+
+        .save-button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .save-button:disabled {
+            background-color: var(--bg-primary);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .save-status {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-left: 0.5rem;
+        }
+
+        .chat-container {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 5px;
+            background-color: var(--bg-secondary);
+            white-space: pre-wrap;
+            line-height: 1.5;
+            overflow-wrap: break-word;
+        }
+
+        .message.user {
+            margin-left: 2rem;
+            background-color: var(--accent);
+        }
+
+        .message.assistant {
+            margin-right: 2rem;
+        }
+
+        .message ul, .message ol {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .message li {
+            margin-bottom: 0.25rem;
+        }
+
+        .message p {
+            margin-bottom: 0.75rem;
+        }
+
+        .message h1, .message h2, .message h3, .message h4 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .message code {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .message pre {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 0.75rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 0.75rem 0;
+        }
+
+        .message pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+
+        .input-container {
+            padding: 1rem;
+            background-color: var(--bg-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: calc(100% - var(--menu-width));
+        }
+
+        .input-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        textarea {
+            flex: 1;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.8rem;
+            border-radius: 5px;
+            resize: none;
+            min-height: 50px;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .mic-active {
+            background-color: var(--danger) !important;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .file-preview {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .file-item {
+            background-color: var(--bg-primary);
+            padding: 0.5rem;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .file-item button {
+            background-color: var(--danger);
+            padding: 0.2rem 0.5rem;
+            width: auto;
+            height: auto;
+            font-size: 1rem;
+        }
+
+        #status {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .control-button {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--accent);
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .control-button:hover {
+            background-color: var(--accent);
+        }
+
+        /* Override Prism styles to match our theme */
+        pre[class*="language-"] {
+            background: rgba(0, 0, 0, 0.3);
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        code[class*="language-"] {
+            text-shadow: none;
+            font-family: monospace;
+        }
+
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-hover);
+        }
+
+        /* Firefox scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) var(--bg-secondary);
+        }
+    </style>
+    <!-- Prism CSS for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+    <!-- Prism JS for syntax highlighting -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
+</head>
+<body>
+    <div class="menu-column">
+        <div class="menu-header">
+            <h1>OChat</h1>
+        </div>
+        <div class="menu-section">
+            <button id="new-chat-btn">New Chat</button>
+        </div>
+        <div class="menu-section">
+            <h3>Model Selection</h3>
+            <select id="model-select">
+                <option value="">Loading models...</option>
+            </select>
+        </div>
+        <div class="menu-section">
+            <h3>Chats</h3>
+            <div id="chat-list" class="chat-list"></div>
+        </div>
+        <div class="menu-section">
+            <h3>Status</h3>
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <div class="chat-column">
+        <div class="chat-header">
+            <input type="text" class="chat-title" id="chat-title" placeholder="New Chat">
+            <button class="save-button" id="save-button" title="Save chat to server">
+                &#128190; Save
+            </button>
+            <span class="save-status" id="save-status"></span>
+        </div>
+        <div class="chat-container" id="chat-container"></div>
+
+        <div class="input-container">
+            <div class="file-preview" id="file-preview"></div>
+            <div class="input-row">
+                <textarea id="user-input" placeholder="Type your message here..."></textarea>
+                <div class="controls">
+                    <button class="control-button" id="attach-button" title="Attach files">&#128206;</button>
+                    <button class="control-button" id="mic-button" title="Voice input">&#127911;</button>
+                    <button class="control-button" id="send-button">&#10148;</button>
+                </div>
+            </div>
+        </div>
+        <input type="file" id="file-input" multiple style="display: none">
+    </div>
+
+    <script>
+        const OLLAMA_ENDPOINT = 'http://localhost:11434';
+        let isRecording = false;
+        let mediaRecorder = null;
+        let attachedFiles = [];
+        let currentModel = '';
+        let currentChatId = null;
+        let chats = [];
+
+        // Initialize speech recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        // DOM Elements
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const micButton = document.getElementById('mic-button');
+        const attachButton = document.getElementById('attach-button');
+        const fileInput = document.getElementById('file-input');
+        const filePreview = document.getElementById('file-preview');
+        const modelSelect = document.getElementById('model-select');
+        const status = document.getElementById('status');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const chatList = document.getElementById('chat-list');
+        const chatTitle = document.getElementById('chat-title');
+        const saveButton = document.getElementById('save-button');
+        const saveStatus = document.getElementById('save-status');
+
+        // Load chats from localStorage
+        function loadChats() {
+            const savedChats = localStorage.getItem('ollama-chats');
+            if (savedChats) {
+                chats = JSON.parse(savedChats);
+                updateChatList();
+            }
+            if (!currentChatId && chats.length > 0) {
+                loadChat(chats[0].id);
+            } else if (!currentChatId) {
+                createNewChat();
+            }
+        }
+
+        // Save chats to localStorage
+        function saveChats() {
+            localStorage.setItem('ollama-chats', JSON.stringify(chats));
+            updateChatList();
+        }
+
+        // Create a new chat
+        function createNewChat() {
+            const newChat = {
+                id: Date.now(),
+                name: `Chat ${chats.length + 1}`,
+                messages: [],
+                model: currentModel
+            };
+            chats.unshift(newChat);
+            currentChatId = newChat.id;
+            saveChats();
+            chatContainer.innerHTML = '';
+            // Set the new chat title
+            document.getElementById('chat-title').value = newChat.name;
+            addMessage('Hello! I\'m ready to help. You can type your message, use voice input, or attach files.');
+        }
+
+        // Update chat list in UI
+        function updateChatList() {
+            chatList.innerHTML = '';
+            chats.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = `chat-item ${chat.id === currentChatId ? 'active' : ''}`;
+                chatItem.innerHTML = `
+                    <span>${chat.name}</span>
+                    <button class="delete-chat" onclick="deleteChat(${chat.id})">×</button>
+                `;
+                chatItem.addEventListener('click', (e) => {
+                    if (e.target.className !== 'delete-chat') {
+                        loadChat(chat.id);
+                    }
+                });
+                chatList.appendChild(chatItem);
+            });
+        }
+
+        // Load a specific chat
+        function loadChat(chatId) {
+            currentChatId = chatId;
+            const chat = chats.find(c => c.id === chatId);
+            if (chat) {
+                chatContainer.innerHTML = '';
+                chat.messages.forEach(msg => {
+                    addMessage(msg.content, msg.role === 'user');
+                });
+                if (chat.model) {
+                    currentModel = chat.model;
+                    modelSelect.value = currentModel;
+                }
+                // Update chat title input
+                document.getElementById('chat-title').value = chat.name;
+                updateChatList();
+            }
+        }
+
+        // Delete a chat
+        function deleteChat(chatId) {
+            chats = chats.filter(c => c.id !== chatId);
+            if (currentChatId === chatId) {
+                if (chats.length > 0) {
+                    loadChat(chats[0].id);
+                } else {
+                    createNewChat();
+                }
+            }
+            saveChats();
+        }
+
+        // Save message to current chat
+        function saveMessage(content, isUser) {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat) {
+                chat.messages.push({
+                    role: isUser ? 'user' : 'assistant',
+                    content: content
+                });
+                chat.model = currentModel;
+                saveChats();
+            }
+        }
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            
+            // Format the content with markdown-like processing
+            if (!isUser) {
+                // Process the content line by line for better list handling
+                const lines = content.split('\n');
+                let inOrderedList = false;
+                let inUnorderedList = false;
+                let inCodeBlock = false;
+                let codeBlockContent = '';
+                let codeLanguage = '';
+                let formattedContent = '';
+                
+                for (let i = 0; i < lines.length; i++) {
+                    let line = lines[i];
+                    
+                    // Handle code blocks
+                    if (line.match(/^```(\w*)$/)) {
+                        // Start of a code block
+                        if (!inCodeBlock) {
+                            inCodeBlock = true;
+                            codeLanguage = line.match(/^```(\w*)$/)[1] || 'javascript'; // Default to javascript if no language specified
+                            codeBlockContent = '';
+                            continue;
+                        } else {
+                            // End of a code block
+                            inCodeBlock = false;
+                            formattedContent += `<pre><code class="language-${codeLanguage}">${codeBlockContent}</code></pre>`;
+                            continue;
+                        }
+                    }
+                    
+                    if (inCodeBlock) {
+                        codeBlockContent += line + '\n';
+                        continue;
+                    }
+                    
+                    // Check for ordered list items (e.g., "1. Item")
+                    const orderedListMatch = line.match(/^\s*(\d+)[\.)]\s+(.+)$/);
+                    if (orderedListMatch) {
+                        if (!inOrderedList) {
+                            // Start a new ordered list
+                            formattedContent += '<ol>';
+                            inOrderedList = true;
+                        }
+                        formattedContent += `<li>${orderedListMatch[2]}</li>`;
+                        
+                        // Check if the next line is not a list item to close the list
+                        if (i === lines.length - 1 || !lines[i + 1].match(/^\s*(\d+)[\.)]\s+(.+)$/)) {
+                            formattedContent += '</ol>';
+                            inOrderedList = false;
+                        }
+                        continue;
+                    } else if (inOrderedList) {
+                        // Close the ordered list if we're no longer in one
+                        formattedContent += '</ol>';
+                        inOrderedList = false;
+                    }
+                    
+                    // Check for unordered list items (e.g., "- Item" or "* Item")
+                    const unorderedListMatch = line.match(/^\s*[-*]\s+(.+)$/);
+                    if (unorderedListMatch) {
+                        if (!inUnorderedList) {
+                            // Start a new unordered list
+                            formattedContent += '<ul>';
+                            inUnorderedList = true;
+                        }
+                        formattedContent += `<li>${unorderedListMatch[1]}</li>`;
+                        
+                        // Check if the next line is not a list item to close the list
+                        if (i === lines.length - 1 || !lines[i + 1].match(/^\s*[-*]\s+(.+)$/)) {
+                            formattedContent += '</ul>';
+                            inUnorderedList = false;
+                        }
+                        continue;
+                    } else if (inUnorderedList) {
+                        // Close the unordered list if we're no longer in one
+                        formattedContent += '</ul>';
+                        inUnorderedList = false;
+                    }
+                    
+                    // Format headers
+                    if (line.match(/^#\s+(.+)$/)) {
+                        line = line.replace(/^#\s+(.+)$/, '<h1>$1</h1>');
+                    } else if (line.match(/^##\s+(.+)$/)) {
+                        line = line.replace(/^##\s+(.+)$/, '<h2>$1</h2>');
+                    } else if (line.match(/^###\s+(.+)$/)) {
+                        line = line.replace(/^###\s+(.+)$/, '<h3>$1</h3>');
+                    }
+                    
+                    // Format inline code
+                    line = line.replace(/`([^`]+)`/g, '<code>$1</code>');
+                    
+                    // Add the line with a paragraph tag if it's not empty
+                    if (line.trim() !== '') {
+                        formattedContent += `<p>${line}</p>`;
+                    } else {
+                        formattedContent += '<br>';
+                    }
+                }
+                
+                messageDiv.innerHTML = formattedContent;
+                
+                // Apply syntax highlighting to code blocks
+                setTimeout(() => {
+                    Prism.highlightAllUnder(messageDiv);
+                }, 0);
+            } else {
+                messageDiv.textContent = content;
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return messageDiv;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message && attachedFiles.length === 0) return;
+
+            addMessage(message, true);
+            saveMessage(message, true);
+            userInput.value = '';
+            updateFilePreview();
+
+            // Get all messages from current chat for context
+            const chat = chats.find(c => c.id === currentChatId);
+            const messages = chat ? chat.messages : [];
+
+            const requestBody = {
+                model: currentModel,
+                messages: messages.map(msg => ({
+                    role: msg.role,
+                    content: msg.content
+                })),
+                stream: true
+            };
+
+            try {
+                status.textContent = 'Connecting...';
+                const response = await fetch(`${OLLAMA_ENDPOINT}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) throw new Error('Failed to send message');
+
+                const messageDiv = addMessage('');
+                let fullResponse = '';
+
+                const decoder = new TextDecoder();
+                const reader = response.body.getReader();
+
+                status.textContent = 'Receiving...';
+
+                while (true) {
+                    const {value, done} = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n').filter(line => line.trim());
+
+                    for (const line of lines) {
+                        try {
+                            const data = JSON.parse(line);
+                            if (data.message?.content) {
+                                fullResponse += data.message.content;
+                                messageDiv.textContent = fullResponse;
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing JSON:', e);
+                        }
+                    }
+                }
+
+                saveMessage(fullResponse, false);
+                status.textContent = '';
+
+            } catch (error) {
+                status.textContent = `Error: ${error.message}`;
+                console.error('Error:', error);
+            }
+        }
+
+        function updateFilePreview() {
+            filePreview.innerHTML = '';
+            attachedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${file.name}</span>
+                    <button onclick="removeFile(${index})" title="Remove file">×</button>
+                `;
+                filePreview.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index) {
+            attachedFiles.splice(index, 1);
+            updateFilePreview();
+        }
+
+        // Fetch available models from Ollama API
+        async function fetchModels() {
+            try {
+                status.textContent = 'Fetching available models...';
+                const response = await fetch(`${OLLAMA_ENDPOINT}/api/tags`);
+                if (!response.ok) throw new Error('Failed to fetch models');
+                
+                const data = await response.json();
+                modelSelect.innerHTML = '';
+                
+                data.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = model.name;
+                    modelSelect.appendChild(option);
+                });
+                
+                // Set the first model as default
+                if (data.models.length > 0) {
+                    currentModel = data.models[0].name;
+                    modelSelect.value = currentModel;
+                }
+                
+                status.textContent = '';
+            } catch (error) {
+                status.textContent = `Error fetching models: ${error.message}`;
+                console.error('Error fetching models:', error);
+            }
+        }
+
+        // Update current model when selection changes
+        modelSelect.addEventListener('change', (e) => {
+            currentModel = e.target.value;
+        });
+
+        // Update chat title
+        function updateChatTitle(newTitle) {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat) {
+                chat.name = newTitle;
+                saveChats();
+            }
+        }
+
+        // Save chat to external server
+        function saveToServer() {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat) {
+                saveStatus.textContent = 'No active chat to save';
+                setTimeout(() => {
+                    saveStatus.textContent = '';
+                }, 3000);
+                return;
+            }
+            
+            // Ensure chat has a name
+            const chatTitle = chat.name || 'untitled_chat';
+            
+            // Disable save button and show saving status
+            saveButton.disabled = true;
+            saveStatus.textContent = 'Saving...';
+            
+            // Format chat content
+            let chatContent = '';
+            chat.messages.forEach(msg => {
+                chatContent += `${msg.role.toUpperCase()}: ${msg.content}\n\n`;
+            });
+            
+            // Sanitize chat title for filename
+            const sanitizedTitle = chatTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            
+            // Prepare request
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "text/plain");
+            
+            // Prepare request options - Replace options with your own server endpoint options
+            const requestOptions = {
+                method: "PUT",
+                headers: myHeaders,
+                body: chatContent,
+                redirect: "follow"
+            };
+            
+            // Send request - Replace the URL with your own server endpoint
+            fetch(`http://192.168.1.43/store/ochat/${sanitizedTitle}.txt`, requestOptions)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`Server responded with status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then((result) => {
+                    saveStatus.textContent = 'Saved!';
+                    setTimeout(() => {
+                        saveStatus.textContent = '';
+                    }, 3000);
+                })
+                .catch((error) => {
+                    saveStatus.textContent = 'Error saving';
+                    console.error('Error saving chat:', error);
+                    setTimeout(() => {
+                        saveStatus.textContent = '';
+                    }, 3000);
+                })
+                .finally(() => {
+                    saveButton.disabled = false;
+                });
+        }
+
+        // Event Listeners
+        newChatBtn.addEventListener('click', createNewChat);
+
+        sendButton.addEventListener('click', sendMessage);
+
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        micButton.addEventListener('click', () => {
+            if (!isRecording) {
+                recognition.start();
+                micButton.classList.add('mic-active');
+                micButton.innerHTML = '&#9208;';
+                micButton.title = 'Stop recording';
+                status.textContent = 'Listening...';
+            } else {
+                recognition.stop();
+                micButton.classList.remove('mic-active');
+                micButton.innerHTML = '&#127911;';
+                micButton.title = 'Voice input';
+                status.textContent = '';
+            }
+            isRecording = !isRecording;
+        });
+
+        recognition.addEventListener('result', (e) => {
+            const transcript = Array.from(e.results)
+                .map(result => result[0])
+                .map(result => result.transcript)
+                .join('');
+            userInput.value = transcript;
+        });
+
+        recognition.addEventListener('end', () => {
+            isRecording = false;
+            micButton.classList.remove('mic-active');
+            micButton.innerHTML = '&#127911;';
+            micButton.title = 'Voice input';
+            status.textContent = '';
+        });
+
+        attachButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            attachedFiles = [...attachedFiles, ...Array.from(e.target.files)];
+            updateFilePreview();
+            fileInput.value = '';
+        });
+
+        document.getElementById('chat-title').addEventListener('change', (e) => {
+            updateChatTitle(e.target.value);
+        });
+
+        document.getElementById('chat-title').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.target.blur();
+            }
+        });
+
+        saveButton.addEventListener('click', saveToServer);
+
+        // Initialize
+        loadChats();
+        fetchModels();
+    </script>
+</body>
+</html>
