@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OChat</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --bg-primary: #1a1a1a;
@@ -468,7 +469,7 @@
         <div class="chat-header">
             <input type="text" class="chat-title" id="chat-title" placeholder="New Chat">
             <button class="save-button" id="save-button" title="Save chat to server">
-                &#128190; Save
+                <i class="fas fa-save"></i> Save
             </button>
             <span class="save-status" id="save-status"></span>
         </div>
@@ -479,9 +480,15 @@
             <div class="input-row">
                 <textarea id="user-input" placeholder="Type your message here..."></textarea>
                 <div class="controls">
-                    <button class="control-button" id="attach-button" title="Attach files">&#128206;</button>
-                    <button class="control-button" id="mic-button" title="Voice input">&#127911;</button>
-                    <button class="control-button" id="send-button">&#10148;</button>
+                    <button class="control-button" id="attach-button" title="Attach files">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <button class="control-button" id="mic-button" title="Voice input">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button class="control-button" id="send-button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1010,13 +1017,13 @@
             if (!isRecording) {
                 recognition.start();
                 micButton.classList.add('mic-active');
-                micButton.innerHTML = '&#9208;';
+                micButton.innerHTML = '<i class="fas fa-stop"></i>';
                 micButton.title = 'Stop recording';
                 status.textContent = 'Listening...';
             } else {
                 recognition.stop();
                 micButton.classList.remove('mic-active');
-                micButton.innerHTML = '&#127911;';
+                micButton.innerHTML = '<i class="fas fa-microphone"></i>';
                 micButton.title = 'Voice input';
                 status.textContent = '';
             }
