@@ -193,6 +193,7 @@
         }
 
         .message {
+            position: relative;
             margin-bottom: 1rem;
             padding: 1rem;
             border-radius: 5px;
@@ -389,6 +390,35 @@
         * {
             scrollbar-width: thin;
             scrollbar-color: var(--accent) var(--bg-secondary);
+        }
+
+        .message .delete-msg {
+            opacity: 0;
+            transition: opacity 0.2s;
+            background: none;
+            border: none;
+            color: var(--danger);
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            font-size: 18px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .message .delete-msg:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .message:hover .delete-msg {
+            opacity: 1;
         }
     </style>
     <!-- Prism CSS for syntax highlighting -->
@@ -593,7 +623,7 @@
         function addMessage(content, isUser = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
-            
+                        
             // Format the content with markdown-like processing
             if (!isUser) {
                 // Process the content line by line for better list handling
@@ -701,11 +731,39 @@
                 }, 0);
             } else {
                 messageDiv.textContent = content;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-msg';
+                deleteBtn.innerHTML = '×';
+                deleteBtn.title = 'Delete message and response';
+                deleteBtn.onclick = () => deleteMessages(messageDiv);
+                messageDiv.appendChild(deleteBtn);
             }
             
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
             return messageDiv;
+        }
+
+        function deleteMessages(messageDiv) {
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat) return;
+
+            // Find all messages in the chat container
+            const messages = Array.from(chatContainer.children);
+            const index = messages.indexOf(messageDiv);
+            
+            if (index !== -1) {
+                // Remove the user message and the assistant's response
+                messageDiv.remove();
+                if (messages[index + 1]?.classList.contains('assistant')) {
+                    messages[index + 1].remove();
+                }
+
+                // Update the chat messages array
+                chat.messages.splice(index, 2);
+                saveChats();
+            }
         }
 
         async function sendMessage() {
