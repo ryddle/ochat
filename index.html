@@ -189,7 +189,7 @@
             flex: 1;
             padding: 1rem;
             overflow-y: auto;
-            max-height: calc(100vh - 120px);
+            max-height: calc(100vh - 260px);
         }
 
         .message {
@@ -455,7 +455,7 @@
                 </div>
             </div>
         </div>
-        <input type="file" id="file-input" multiple style="display: none">
+        <input type="file" id="file-input" multiple accept="image/*" style="display: none">
     </div>
 
     <script>
@@ -712,9 +712,33 @@
             const message = userInput.value.trim();
             if (!message && attachedFiles.length === 0) return;
 
-            addMessage(message, true);
+            // Add images to the user message if there are any
+            let images = [];
+            if (attachedFiles.length > 0) {
+                try {
+                    images = await Promise.all(attachedFiles.map(async file => {
+                        return new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                                // Get base64 without data URL prefix
+                                const base64 = reader.result.split(',')[1];
+                                resolve(base64);
+                            };
+                            reader.onerror = reject;
+                            reader.readAsDataURL(file);
+                        });
+                    }));
+                } catch (error) {
+                    console.error('Error converting images:', error);
+                    status.textContent = 'Error processing images';
+                    return;
+                }
+            }
+
+            addMessage(message + (attachedFiles.length ? ` [${attachedFiles.length} images attached]` : ''), true);
             saveMessage(message, true);
             userInput.value = '';
+            attachedFiles = [];
             updateFilePreview();
 
             // Get all messages from current chat for context
@@ -729,6 +753,11 @@
                 })),
                 stream: true
             };
+
+            // Add images to the request body
+            if (images.length > 0) {
+                requestBody.messages[requestBody.messages.length - 1].images = images;
+            }
 
             try {
                 status.textContent = 'Connecting...';
@@ -957,7 +986,12 @@
         });
 
         fileInput.addEventListener('change', (e) => {
-            attachedFiles = [...attachedFiles, ...Array.from(e.target.files)];
+            const validFiles = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
+            if (validFiles.length !== e.target.files.length) {
+                status.textContent = 'Only image files are allowed';
+                setTimeout(() => status.textContent = '', 3000);
+            }
+            attachedFiles = [...attachedFiles, ...validFiles];
             updateFilePreview();
             fileInput.value = '';
         });
