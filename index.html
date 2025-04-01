@@ -16,6 +16,7 @@
             --accent-hover: #8075e9;
             --danger: #ff5252;
             --menu-width: 250px;
+            --accent-rgb: 108, 92, 231;
         }
 
         * {
@@ -62,6 +63,9 @@
             font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .chat-list {
@@ -190,7 +194,7 @@
             flex: 1;
             padding: 1rem;
             overflow-y: auto;
-            max-height: calc(100vh - 260px);
+            max-height: calc(100vh - 278px);
         }
 
         .message {
@@ -273,6 +277,13 @@
             border-radius: 5px;
         }
 
+        .file-preview {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+        }
+
         textarea {
             flex: 1;
             background-color: var(--bg-primary);
@@ -316,21 +327,66 @@
         }
 
         .file-item {
-            background-color: var(--bg-primary);
-            padding: 0.5rem;
-            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 60px;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+            position: relative;
+        }
+
+        .file-preview-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background-color: var(--bg-secondary);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .file-preview-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .file-preview-image i {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .file-item .file-name {
+            width: 100%;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 0 12px;
+            font-size: 0.7rem; /* Reduced from 0.8rem */
+            color: var(--text-secondary); /* Added to make it look more subtle */
         }
 
         .file-item button {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 16px;
+            height: 16px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
             background-color: var(--danger);
-            padding: 0.2rem 0.5rem;
-            width: auto;
-            height: auto;
-            font-size: 1rem;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        .file-item button:hover {
+            opacity: 1;
         }
 
         #status {
@@ -421,6 +477,216 @@
         .message:hover .delete-msg {
             opacity: 1;
         }
+
+        .message .code-block {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            margin: 0.75rem 0;
+            position: relative;
+            padding: 1.5rem 1rem 1rem;
+        }
+
+        .message .code-block::before {
+            content: 'Code';
+            position: absolute;
+            top: -0.75rem;
+            left: 1rem;
+            background: var(--bg-secondary);
+            padding: 0 0.5rem;
+            font-size: 0.8rem;
+            color: var(--accent);
+            z-index: 1;
+        }
+
+        .message .code-block .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            padding: 0.2rem;
+            width: auto;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.2s, color 0.2s;
+        }
+
+        .message .code-block:hover .copy-btn {
+            opacity: 1;
+        }
+
+        .message .code-block .copy-btn:hover {
+            color: var(--accent-hover);
+        }
+
+        .message .reasoning-block {
+            background: rgba(var(--accent-rgb), 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            margin: 0.75rem 0;
+            position: relative;
+            padding: 2rem 1rem 1rem;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .message .reasoning-block-content {
+            background: rgba(var(--accent-rgb), 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            margin: -2.25rem 0;
+            position: relative;
+            padding: 1rem 1rem 1rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .message .reasoning-block.collapsed {
+            max-height: 3rem;
+        }
+
+        .message .reasoning-block::before {
+            content: 'Reasoning';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: var(--bg-secondary);
+            padding: 0 8px;
+            font-size: 0.8rem;
+            color: var(--accent);
+        }
+
+        .message .reasoning-block .toggle-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            padding: 0.2rem;
+            width: auto;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
+
+        .message .reasoning-block .toggle-btn:hover {
+            color: var (--accent-hover);
+        }
+
+        /********************/
+        .model-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .model-controls select {
+            flex: 1;
+        }
+
+        .model-dialog {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 0;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .model-dialog::backdrop {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .dialog-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dialog-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: auto;
+            height: auto;
+        }
+
+        .dialog-content {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .model-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .model-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .model-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: var(--bg-primary);
+            border-radius: 5px;
+        }
+
+        .model-item button {
+            width: auto;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.9rem;
+            background-color: var(--danger);
+        }
+
+        .pull-model-form {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .pull-model-form input {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 1px solid var(--accent);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .pull-model-form button {
+            width: auto;
+            white-space: nowrap;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
     </style>
     <!-- Prism CSS for syntax highlighting -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
@@ -442,18 +708,40 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-yaml.min.js"></script>
 </head>
 <body>
+    <dialog class="model-dialog" id="model-config-dialog">
+        <div class="dialog-header">
+            <h2>Model Configuration</h2>
+            <button class="close-button" onclick="closeModelDialog()">&times;</button>
+        </div>
+        <div class="dialog-content">
+            <div class="model-section">
+                <h3>Available Models</h3>
+                <div id="model-list" class="model-list"></div>
+            </div>
+            <div class="model-section">
+                <h3>Pull New Model</h3>
+                <div class="pull-model-form">
+                    <input type="text" id="model-name-input" placeholder="Enter model name (e.g., llama2)">
+                    <button id="pull-model-btn">Pull Model</button>
+                </div>
+                <div id="pull-status" class="status-text"></div>
+            </div>
+        </div>
+    </dialog>
     <div class="menu-column">
         <div class="menu-header">
             <h1>OChat</h1>
         </div>
         <div class="menu-section">
-            <button id="new-chat-btn">New Chat</button>
-        </div>
-        <div class="menu-section">
-            <h3>Model Selection</h3>
+            <h3>Model Selection<button id="model-config-btn" class="control-button" title="Configure Models">
+                <i class="fas fa-cog"></i>
+            </button></h3>
             <select id="model-select">
                 <option value="">Loading models...</option>
             </select>
+        </div>
+        <div class="menu-section" style="margin-top: 30px;">
+            <button id="new-chat-btn">New Chat</button>
         </div>
         <div class="menu-section">
             <h3>Chats</h3>
@@ -476,8 +764,8 @@
         <div class="chat-container" id="chat-container"></div>
 
         <div class="input-container">
-            <div class="file-preview" id="file-preview"></div>
             <div class="input-row">
+                <div class="file-preview" id="file-preview"></div>
                 <textarea id="user-input" placeholder="Type your message here..."></textarea>
                 <div class="controls">
                     <button class="control-button" id="attach-button" title="Attach files">
@@ -525,6 +813,122 @@
         const chatTitle = document.getElementById('chat-title');
         const saveButton = document.getElementById('save-button');
         const saveStatus = document.getElementById('save-status');
+
+        // Model configuration dialog functionality
+        const modelDialog = document.getElementById('model-config-dialog');
+        const modelConfigBtn = document.getElementById('model-config-btn');
+        const modelList = document.getElementById('model-list');
+        const pullModelBtn = document.getElementById('pull-model-btn');
+        const modelNameInput = document.getElementById('model-name-input');
+        const pullStatus = document.getElementById('pull-status');
+
+        modelConfigBtn.addEventListener('click', () => {
+            modelDialog.showModal();
+            refreshModelList();
+        });
+
+        function closeModelDialog() {
+            modelDialog.close();
+        }
+
+        async function refreshModelList() {
+            try {
+                const response = await fetch('http://localhost:11434/api/tags');
+                const data = await response.json();
+                
+                // Update model list in dialog
+                modelList.innerHTML = '';
+                data.models.forEach(model => {
+                    const modelItem = document.createElement('div');
+                    modelItem.className = 'model-item';
+                    modelItem.innerHTML = `
+                        <span>${model.name}</span>
+                        <button onclick="deleteModel('${model.name}')">Delete</button>
+                    `;
+                    modelList.appendChild(modelItem);
+                });
+
+                // Update model select dropdown
+                modelSelect.innerHTML = '';
+                data.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = model.name;
+                    modelSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching models:', error);
+                modelList.innerHTML = '<div class="status-text">Error loading models. Is Ollama running?</div>';
+            }
+        }
+
+        async function deleteModel(modelName) {
+            try {
+                const response = await fetch('http://localhost:11434/api/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name: modelName })
+                });
+
+                if (response.ok) {
+                    refreshModelList();
+                } else {
+                    throw new Error('Failed to delete model');
+                }
+            } catch (error) {
+                console.error('Error deleting model:', error);
+                alert('Failed to delete model. Please try again.');
+            }
+        }
+
+        pullModelBtn.addEventListener('click', async () => {
+            const modelName = modelNameInput.value.trim();
+            if (!modelName) return;
+
+            pullStatus.textContent = `Pulling model: ${modelName}...`;
+            pullModelBtn.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:11434/api/pull', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name: modelName })
+                });
+
+                const reader = response.body.getReader();
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const text = new TextDecoder().decode(value);
+                    const lines = text.split('\n').filter(line => line);
+                    const lastLine = JSON.parse(lines[lines.length - 1]);
+                    
+                    if (lastLine.status) {
+                        pullStatus.textContent = lastLine.status;
+                    }
+                }
+
+                pullStatus.textContent = 'Model pulled successfully!';
+                modelNameInput.value = '';
+                refreshModelList();
+            } catch (error) {
+                console.error('Error pulling model:', error);
+                pullStatus.textContent = 'Error pulling model. Please try again.';
+            } finally {
+                pullModelBtn.disabled = false;
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshModelList();
+        });
 
         // Load chats from localStorage
         function loadChats() {
@@ -630,21 +1034,22 @@
         function addMessage(content, isUser = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
-                        
-            // Format the content with markdown-like processing
+            
             if (!isUser) {
-                // Process the content line by line for better list handling
+                // Process the content line by line for better handling
                 const lines = content.split('\n');
+                let formattedContent = '';
+                let inReasoningBlock = false;
+                let reasoningContent = '';
                 let inOrderedList = false;
                 let inUnorderedList = false;
                 let inCodeBlock = false;
                 let codeBlockContent = '';
                 let codeLanguage = '';
-                let formattedContent = '';
                 
                 for (let i = 0; i < lines.length; i++) {
                     let line = lines[i];
-                    
+
                     // Handle code blocks
                     if (line.match(/^```(\w*)$/)) {
                         // Start of a code block
@@ -656,7 +1061,13 @@
                         } else {
                             // End of a code block
                             inCodeBlock = false;
-                            formattedContent += `<pre><code class="language-${codeLanguage}">${codeBlockContent}</code></pre>`;
+                            formattedContent += `
+                                <div class="code-block">
+                                    <button class="copy-btn" onclick="copyCode(this)" title="Copy to clipboard">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <pre><code class="language-${codeLanguage}">${codeBlockContent}</code></pre>
+                                </div>`;
                             continue;
                         }
                     }
@@ -665,7 +1076,34 @@
                         codeBlockContent += line + '\n';
                         continue;
                     }
+
+                    // Detect reasoning tags
+                    if (line.match(/<(think|thinking|thought)>/i)) {
+                        inReasoningBlock = true;
+                        reasoningContent = '';
+                        continue;
+                    }
                     
+                    if (line.match(/<\/(think|thinking|thought)>/i)) {
+                        inReasoningBlock = false;
+                        formattedContent += `
+                            <div class="reasoning-block collapsed">
+                                <button class="toggle-btn" onclick="toggleReasoning(this)">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                                <div class="reasoning-block-content">
+                                ${reasoningContent}
+                                </div>
+                            </div>
+                        `;
+                        continue;
+                    }
+
+                    if (inReasoningBlock) {
+                        reasoningContent += `<p>${line}</p>`;
+                        continue;
+                    }
+
                     // Check for ordered list items (e.g., "1. Item")
                     const orderedListMatch = line.match(/^\s*(\d+)[\.)]\s+(.+)$/);
                     if (orderedListMatch) {
@@ -752,6 +1190,20 @@
             return messageDiv;
         }
 
+        function toggleReasoning(btn) {
+            const block = btn.parentElement;
+            const content = block.querySelector('.reasoning-block-content');
+            block.classList.toggle('collapsed');
+            btn.innerHTML = block.classList.contains('collapsed') 
+                ? '<i class="fas fa-chevron-down"></i>' 
+                : '<i class="fas fa-chevron-up"></i>';
+            if (!block.classList.contains('collapsed')) {
+                content.style.display = 'block';
+            }else{
+                content.style.display = 'none';
+            }
+        }
+
         function deleteMessages(messageDiv) {
             const chat = chats.find(c => c.id === currentChatId);
             if (!chat) return;
@@ -824,48 +1276,137 @@
                 requestBody.messages[requestBody.messages.length - 1].images = images;
             }
 
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message assistant`;
+            chatContainer.appendChild(messageDiv);
+            
+            let streamCache = '';
+            let currentBlock = null;
+            let blockContent = '';
+            let inBlock = false;
+            let blockType = '';
+            let textContent = document.createElement('p');
+            messageDiv.appendChild(textContent);
+
             try {
                 status.textContent = 'Connecting...';
                 const response = await fetch(`${OLLAMA_ENDPOINT}/api/chat`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
                 });
 
                 if (!response.ok) throw new Error('Failed to send message');
 
-                const messageDiv = addMessage('');
-                let fullResponse = '';
-
                 const decoder = new TextDecoder();
                 const reader = response.body.getReader();
-
                 status.textContent = 'Receiving...';
+
+                const processContent = (content) => {
+                    if (inBlock) {
+                        blockContent += content;
+                        if (blockType === 'code') {
+                            const codeElement = currentBlock.querySelector('code');
+                            // Only update code block content on complete tokens/words
+                            if (content.match(/[\s\n]/) || content.match(/[.;{}()\[\]]/)) {
+                                codeElement.textContent = blockContent;
+                                Prism.highlightElement(codeElement);
+                            }
+                        } else {
+                            const contentDiv = currentBlock.querySelector('.reasoning-block-content');
+                            contentDiv.innerHTML = `<p>${blockContent}</p>`;
+                        }
+                    } else {
+                        textBuffer += content;
+                        if (content.match(/[.!?]\s*$/) || content.match(/\n/)) {
+                            textContent.textContent = textBuffer.trim();
+                            textBuffer = '';
+                        }
+                    }
+                };
 
                 while (true) {
                     const {value, done} = await reader.read();
                     if (done) break;
 
                     const chunk = decoder.decode(value);
-                    const lines = chunk.split('\n').filter(line => line.trim());
-
-                    for (const line of lines) {
+                    for (const line of chunk.split('\n').filter(l => l.trim())) {
                         try {
                             const data = JSON.parse(line);
-                            if (data.message?.content) {
-                                fullResponse += data.message.content;
-                                messageDiv.textContent = fullResponse;
+                            if (!data.message?.content) continue;
+                                const content = data.message.content;
+                                streamCache += content;
+
+                                // Check for block start
+                                const codeMatch = content === '```' || content.match(/^```(\w*)$/);
+                                const reasoningMatch = content.match(/<(think|thinking|thought)>/i);
+
+                                if (codeMatch || reasoningMatch) {
+                                    if (!inBlock) {
+                                        inBlock = true;
+                                        blockType = codeMatch ? 'code' : 'reasoning';
+                                        currentBlock = document.createElement('div');
+                                        
+                                        if (blockType === 'code') {
+                                            const lang = codeMatch[1] || 'javascript';
+                                            currentBlock.className = 'code-block';
+                                            currentBlock.innerHTML = `
+                                                <button class="copy-btn" onclick="copyCode(this)" title="Copy to clipboard">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                                <pre><code class="language-${lang}"></code></pre>
+                                            `;
+                                        } else {
+                                            currentBlock.className = 'reasoning-block collapsed';
+                                            currentBlock.innerHTML = `
+                                                <button class="toggle-btn" onclick="toggleReasoning(this)">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </button>
+                                                <div class="reasoning-block-content"></div>
+                                            `;
+                                        }
+                                        
+                                        messageDiv.appendChild(currentBlock);
+                                        blockContent = '';
+                                        continue;
+                                    }
+                                }
+
+                                // Process content
+                                processContent(content);
+
+                                // Check for block end
+                                const isCodeEnd = blockType === 'code' && (content.startsWith('`') && blockContent.match(/```\n*.*$/));
+                                const isReasoningEnd = blockType === 'reasoning' && content.match(/<\/(think|thinking|thought)>/i);
+                                if ((isCodeEnd || isReasoningEnd) && inBlock) {
+                                    inBlock = false;
+                                    if (blockType === 'code') {
+                                        const codeElement = currentBlock.querySelector('code');
+                                        codeElement.textContent = blockContent;
+                                        Prism.highlightElement(codeElement);
+                                    } else {
+                                        const contentDiv = currentBlock.querySelector('.reasoning-block-content');
+                                        contentDiv.innerHTML = blockContent;
+                                        contentDiv.style.display = 'none';
+                                    }
+                                    
+                                    // Create new text container for content after the block
+                                    textContent = document.createElement('p');
+                                    messageDiv.appendChild(textContent);
+                                    
+                                    currentBlock = null;
+                                    blockContent = '';
+                                    continue;
+                                }
+
                                 chatContainer.scrollTop = chatContainer.scrollHeight;
-                            }
                         } catch (e) {
                             console.error('Error parsing JSON:', e);
                         }
                     }
                 }
 
-                saveMessage(fullResponse, false);
+                saveMessage(streamCache, false);
                 status.textContent = '';
 
             } catch (error) {
@@ -879,10 +1420,26 @@
             attachedFiles.forEach((file, index) => {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-item';
-                fileItem.innerHTML = `
-                    <span>${file.name}</span>
+                
+                const preview = document.createElement('div');
+                preview.className = 'file-preview-image';
+                
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    preview.appendChild(img);
+                } else {
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-file';
+                    preview.appendChild(icon);
+                }
+                
+                fileItem.appendChild(preview);
+                fileItem.innerHTML += `
+                    <span class="file-name" title="${file.name}">${file.name}</span>
                     <button onclick="removeFile(${index})" title="Remove file">×</button>
                 `;
+                
                 filePreview.appendChild(fileItem);
             });
         }
@@ -1076,6 +1633,27 @@
         // Initialize
         loadChats();
         fetchModels();
+
+        // Función para copiar el código
+        function copyCode(btn) {
+            const pre = btn.nextElementSibling;
+            const code = pre.querySelector('code');
+            const text = code.innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Cambiar el icono temporalmente para indicar éxito
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-copy"></i>';
+                }, 2000);
+            }).catch(err => {
+                console.error('Error copying text:', err);
+                btn.innerHTML = '<i class="fas fa-times"></i>';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-copy"></i>';
+                }, 2000);
+            });
+        }
     </script>
 </body>
 </html>
