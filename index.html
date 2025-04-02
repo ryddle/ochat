@@ -45,12 +45,22 @@
             position: fixed;
             left: 0;
             top: 0;
+            transition: all 0.3s ease;
+        }
+
+        .menu-column.collapsed{
+            left: calc(var(--menu-width)* -1);
         }
 
         .menu-header {
             padding-bottom: 1rem;
             border-bottom: 1px solid #3d3d3d;
             text-align: center;
+        }
+
+        .menu-header h1 {
+            display: flex;
+            justify-content: space-between;
         }
 
         .menu-section {
@@ -116,6 +126,11 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .chat-column.collapsed {
+            margin-left: 0;
         }
 
         .chat-header {
@@ -198,6 +213,10 @@
             max-height: calc(100vh - 278px);
         }
 
+        .sidebar-open-btn {
+            display: none !important;
+        }
+
         .message {
             position: relative;
             margin-bottom: 1rem;
@@ -267,6 +286,11 @@
             bottom: 0;
             right: 0;
             width: calc(100% - var(--menu-width));
+            transition: all 0.3s ease;
+        }
+
+        .input-container.collapsed {
+            width: 100%;
         }
 
         .input-row {
@@ -729,9 +753,14 @@
             </div>
         </div>
     </dialog>
-    <div class="menu-column">
+    <div class="menu-column" id="menu-column">
         <div class="menu-header">
-            <h1><img src="logo.png" alt="OChat Logo"></h1>
+            <h1>
+                <img src="logo.png" alt="OChat Logo">
+                <button id="sidebar-close-btn" class="control-button" title="Close Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </h1>
         </div>
         <div class="menu-section">
             <h3>Model Selection<button id="model-config-btn" class="control-button" title="Configure Models">
@@ -754,8 +783,11 @@
         </div>
     </div>
 
-    <div class="chat-column">
+    <div class="chat-column" id="chat-column">
         <div class="chat-header">
+            <button id="sidebar-open-btn" class="control-button" style="display: none;" title="Open Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
             <input type="text" class="chat-title" id="chat-title" placeholder="New Chat">
             <button class="save-button" id="save-button" title="Save chat to server">
                 <i class="fas fa-save"></i> Save
@@ -764,7 +796,7 @@
         </div>
         <div class="chat-container" id="chat-container"></div>
 
-        <div class="input-container">
+        <div class="input-container" id="input-container">
             <div class="input-row">
                 <div class="file-preview" id="file-preview"></div>
                 <textarea id="user-input" placeholder="Type your message here..."></textarea>
@@ -814,6 +846,11 @@
         const chatTitle = document.getElementById('chat-title');
         const saveButton = document.getElementById('save-button');
         const saveStatus = document.getElementById('save-status');
+        const sideBar = document.getElementById('menu-column');
+        const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+        const sidebarOpenBtn = document.getElementById('sidebar-open-btn');
+        const chatColumn = document.getElementById('chat-column');
+        const inputContainer = document.getElementById('input-container');
 
         // Model configuration dialog functionality
         const modelDialog = document.getElementById('model-config-dialog');
@@ -1630,6 +1667,26 @@
         });
 
         saveButton.addEventListener('click', saveToServer);
+
+
+        sidebarCloseBtn.addEventListener('click', () => {
+            toggleSidebar();
+        });
+
+        sidebarOpenBtn.addEventListener('click', () => {
+            toggleSidebar();
+        });
+
+        function toggleSidebar() {
+            sideBar.classList.toggle('collapsed');
+            chatColumn.classList.toggle('collapsed');
+            inputContainer.classList.toggle('collapsed');
+            if (sideBar.classList.contains('collapsed')) {
+                sidebarOpenBtn.style.display = 'block';
+            } else {
+                sidebarOpenBtn.style.display = 'none';
+            }
+        }
 
         // Initialize
         loadChats();
