@@ -1200,7 +1200,11 @@
                     
                     // Add the line with a paragraph tag if it's not empty
                     if (line.trim() !== '') {
-                        formattedContent += `<p>${line}</p>`;
+                        if(!line.match(/^(?!<\/?[a-z][\s\S]*>).+$/i)){
+                            formattedContent += `<p>${line}</p>`;
+                        } else {
+                            formattedContent += line;
+                        }
                     } else {
                         formattedContent += '<br>';
                     }
