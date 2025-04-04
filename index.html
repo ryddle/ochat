@@ -1355,11 +1355,7 @@
                             contentDiv.innerHTML = `<p>${blockContent}</p>`;
                         }
                     } else {
-                        textBuffer += content;
-                        if (content.match(/[.!?]\s*$/) || content.match(/\n/)) {
-                            textContent.textContent = textBuffer.trim();
-                            textBuffer = '';
-                        }
+                        textContent.textContent += content;
                     }
                 };
 
